@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Darkroom - Edición con Darktable</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root { --fs-green: #ADFF2F; --fs-bg: #0a0a0a; }
+    body { background: var(--fs-bg); }
+    .hero {
+      background: linear-gradient(135deg, rgba(10,10,10,0.95) 0%, rgba(10,25,10,0.9) 100%);
+      padding: 2rem 0; border-bottom: 1px solid rgba(173,255,47,0.1);
+    }
+    .status-badge {
+      font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col">
+        <h1 class="fw-bold mb-0">
+          <i class="bi bi-layers me-2" style="color:var(--fs-green)"></i>Darkroom
+        </h1>
+        <p class="text-muted mb-0">Edición automática con Darktable</p>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-success btn-sm" onclick="showSection('presets')">
+          <i class="bi bi-collection me-1"></i>Presets
+        </button>
+        <button class="btn btn-outline-primary btn-sm" onclick="showSection('process')">
+          <i class="bi bi-play me-1"></i>Procesar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+
+  <!-- Sección: Presets -->
+  <div id="section-presets" class="mb-4">
+    <div class="card border" style="border-color:rgba(173,255,47,0.2)">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title fw-bold mb-0">
+          <i class="bi bi-collection me-2" style="color:var(--fs-green)"></i>Mis Presets
+        </h5>
+        <button class="btn btn-sm btn-success" onclick="document.getElementById('preset-upload').click()">
+          <i class="bi bi-plus me-1"></i>Subir Preset
+        </button>
+      </div>
+      <input type="file" id="preset-upload" class="d-none" accept=".xmp" onchange="uploadPreset(event)"/>
+      <div class="card-body">
+        <div id="presets-loading" class="text-center py-3">
+          <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+        <div id="presets-empty" class="text-center py-4 d-none">
+          <i class="bi bi-images fs-1 d-block mb-2 text-muted opacity-50"></i>
+          <p class="text-muted mb-0">No tenés presets aún</p>
+        </div>
+        <div id="presets-list" class="row g-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección: Procesar -->
+  <div id="section-process" class="mb-4 d-none">
+    <div class="card border" style="border-color:rgba(173,255,47,0.2)">
+      <div class="card-header">
+        <h5 class="card-title fw-bold mb-0">
+          <i class="bi bi-play me-2" style="color:var(--fs-green)"></i>Procesar Fotos
+        </h5>
+      </div>
+      <div class="card-body">
+        <form id="process-form">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Seleccionar Preset</label>
+            <select id="preset-select" class="form-select" required>
+              <option value="">Elegí un preset...</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">IDs de Fotos (separados por coma)</label>
+            <textarea id="photo-ids" class="form-control" rows="3" 
+                      placeholder="Ej: 123, 456, 789" required></textarea>
+            <small class="text-muted">Los IDs de las fotos de la galería</small>
+          </div>
+          <button type="button" class="btn btn-success fw-semibold w-100" onclick="startProcessing()">
+            <i class="bi bi-play-circle me-1"></i>Iniciar Procesamiento
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Trabajos -->
+    <div class="card border mt-4" style="border-color:rgba(173,255,47,0.2)">
+      <div class="card-header">
+        <h5 class="card-title fw-bold mb-0">
+          <i class="bi bi-list-task me-2" style="color:var(--fs-green)"></i>Trabajos
+        </h5>
+      </div>
+      <div class="card-body">
+        <div id="jobs-loading" class="text-center py-3">
+          <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+        <div id="jobs-empty" class="text-center py-4 d-none">
+          <i class="bi bi-clipboard-x fs-1 d-block mb-2 text-muted opacity-50"></i>
+          <p class="text-muted mb-0">No hay trabajos aún</p>
+        </div>
+        <div id="jobs-list"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API_BASE = '/api';
+
+function showSection(name) {
+  document.querySelectorAll('#section-presets, #section-process').forEach(el => el.classList.add('d-none'));
+  document.getElementById('section-' + name).classList.remove('d-none');
+  
+  if (name === 'presets') loadPresets();
+  if (name === 'process') loadJobs();
+}
+
+async function loadPresets() {
+  try {
+    const r = await fetch(API_BASE + '/presets/');
+    if (!r.ok) throw new Error('Error al cargar presets');
+    const presets = await r.json();
+    
+    document.getElementById('presets-loading').classList.add('d-none');
+    
+    if (!presets.length) {
+      document.getElementById('presets-empty').classList.remove('d-none');
+      document.getElementById('presets-list').innerHTML = '';
+      return;
+    }
+    
+    document.getElementById('presets-empty').classList.add('d-none');
+    document.getElementById('presets-list').innerHTML = presets.map(p => `
+      <div class="col-md-4">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title fw-bold mb-1">
+              <i class="bi bi-layers me-1" style="color:var(--fs-green)"></i>${p.filename}
+            </h6>
+            <small class="text-muted mb-2">Creado: ${new Date(p.created_at).toLocaleDateString('es-AR')}</small>
+            <div class="mt-auto">
+              <code class="small text-muted">${p.preset_id}</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    
+    // Actualizar select de presets
+    const select = document.getElementById('preset-select');
+    select.innerHTML = '<option value="">Elegí un preset...</option>' + 
+      presets.map(p => `<option value="${p.preset_id}">${p.filename}</option>`).join('');
+    
+  } catch(e) {
+    console.error('Error cargando presets:', e);
+  }
+}
+
+async function uploadPreset(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  try {
+    const r = await fetch(API_BASE + '/presets/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || 'Error al subir preset');
+    }
+    
+    const data = await r.json();
+    alert('✅ Preset subido exitosamente');
+    loadPresets();
+  } catch(e) {
+    alert('❌ Error: ' + e.message);
+  }
+}
+
+async function startProcessing() {
+  const presetId = document.getElementById('preset-select').value;
+  const photoIds = document.getElementById('photo-ids').value
+    .split(',')
+    .map(id => parseInt(id.trim()))
+    .filter(id => !isNaN(id));
+  
+  if (!presetId) { alert('Seleccioná un preset'); return; }
+  if (!photoIds.length) { alert('Ingresá IDs de fotos válidos'); return; }
+  
+  try {
+    const r = await fetch(API_BASE + '/process', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ preset_id: presetId, photo_ids: photoIds })
+    });
+    
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || 'Error al iniciar procesamiento');
+    }
+    
+    const data = await r.json();
+    alert('✅ Procesamiento iniciado: ' + data.job_id);
+    document.getElementById('process-form').reset();
+    loadJobs();
+  } catch(e) {
+    alert('❌ Error: ' + e.message);
+  }
+}
+
+async function loadJobs() {
+  try {
+    const r = await fetch(API_BASE + '/jobs/');
+    if (!r.ok) throw new Error('Error al cargar trabajos');
+    const jobs = await r.json();
+    
+    document.getElementById('jobs-loading').classList.add('d-none');
+    
+    if (!Object.keys(jobs).length) {
+      document.getElementById('jobs-empty').classList.remove('d-none');
+      document.getElementById('jobs-list').innerHTML = '';
+      return;
+    }
+    
+    document.getElementById('jobs-empty').classList.add('d-none');
+    document.getElementById('jobs-list').innerHTML = Object.entries(jobs).map(([jobId, job]) => `
+      <div class="card mb-2">
+        <div class="card-body py-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title fw-bold mb-0">${jobId}</h6>
+              <small class="text-muted">
+                <span class="badge ${job.status === 'completed' ? 'bg-success' : job.status === 'failed' ? 'bg-danger' : 'bg-primary'}">
+                  ${job.status}
+                </span>
+                ${job.progress ? Math.round(job.progress * 100) + '%' : ''}
+              </small>
+            </div>
+            <small class="text-muted">${job.processed_photos}/${job.total_photos} fotos</small>
+          </div>
+          ${job.message ? `<small class="text-muted d-block mt-1">${job.message}</small>` : ''}
+        </div>
+      </div>
+    `).join('');
+    
+  } catch(e) {
+    console.error('Error cargando trabajos:', e);
+  }
+}
+
+// Iniciar
+loadPresets();
+</script>
+</body>
+</html>
