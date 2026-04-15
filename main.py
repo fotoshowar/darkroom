@@ -91,9 +91,9 @@ async def check_darkroom_access(db: AsyncSession = Depends(get_db)):
 
 # ── Endpoints ───────────────────────────────────────────────────────────────────
 
-@app.get("/")
-async def root():
-    """Página de inicio del servicio."""
+@app.get("/api/info")
+async def info():
+    """Información del servicio."""
     return {
         "service": "Darkroom - Darktable Editing Service",
         "status": "running",
