@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:darktable="http://darktable.sf.net/">
+  <rdf:Description rdf:about="" darktable:xmp_version="4">
+    <!-- INTEGRACIÓN BIEN - Unifica la composición final -->
+    <darktable:auto_presets_applied>0</darktable:auto_presets_applied>
+
+    <!-- Aumentar saturación para unificar colores -->
+    <darktable:saturation>12</darktable:saturation>
+
+    <!-- Aumentar contraste global suavemente -->
+    <darktable:contrast>8</darktable:contrast>
+
+    <!-- Reducir claridad (clarity) para suavizar transiciones -->
+    <darktable:clarity>-10</darktable:clarity>
+
+    <!-- Levantar sombras para uniformizar -->
+    <darktable:shadows>15</darktable:shadows>
+
+    <!-- Reducir highlights para que no se vea pegado -->
+    <darktable:highlights>-8</darktable:highlights>
+
+    <!-- Vibrancia para que se vea más natural -->
+    <darktable:vibrance>5</darktable:vibrance>
+
+  </rdf:Description>
+</x:xmpmeta>

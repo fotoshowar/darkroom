@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:darktable="http://darktable.sf.net/">
+  <rdf:Description rdf:about="" darktable:xmp_version="4">
+    <darktable:auto_presets_applied>0</darktable:auto_presets_applied>
+
+    <!-- Exposure: reduce overall brightness -->
+    <darktable:exposure>-0.4</darktable:exposure>
+
+    <!-- Blacks: no cambiar -->
+    <darktable:black>0</darktable:black>
+
+    <!-- Shadows: lift shadows to compensate -->
+    <darktable:shadows>30</darktable:shadows>
+
+    <!-- Highlights: reduce harsh highlights from flash -->
+    <darktable:highlights>-50</darktable:highlights>
+
+    <!-- Whites: reduce -->
+    <darktable:whites>-15</darktable:whites>
+
+  </rdf:Description>
+</x:xmpmeta>

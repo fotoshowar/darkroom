@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:darktable="http://darktable.sf.net/">
+  <rdf:Description rdf:about="" darktable:xmp_version="4">
+    <!-- INTEGRACIÓN FINAL ULTRA VÍVIDA - Colores saturados, cálidos, profesionales -->
+
+    <!-- EXPOSICIÓN - MÁS BRILLANTE -->
+    <darktable:exposure>0.4</darktable:exposure>
+    <darktable:black>8</darktable:black>
+    <darktable:whites>15</darktable:whites>
+
+    <!-- SOMBRAS Y HIGHLIGHTS - Contraste dramático -->
+    <darktable:shadows>35</darktable:shadows>
+    <darktable:highlights>-25</darktable:highlights>
+
+    <!-- CONTRASTE FUERTE -->
+    <darktable:contrast>20</darktable:contrast>
+    <darktable:clarity>-3</darktable:clarity>
+
+    <!-- COLOR SATURADO Y VÍVIDO - AGRESIVO -->
+    <darktable:saturation>35</darktable:saturation>
+    <darktable:vibrance>20</darktable:vibrance>
+
+    <!-- TEMPERATURA MÁS CÁLIDA AÚN -->
+    <darktable:temperature>200</darktable:temperature>
+
+    <!-- BALANCE DE COLOR - Tonos más cálidos -->
+    <darktable:greenmagenta>8</darktable:greenmagenta>
+    <darktable:yellowblue>-5</darktable:yellowblue>
+
+    <!-- TONOS MEDIOS - Realce máximo -->
+    <darktable:midtones>15</darktable:midtones>
+
+    <!-- VIÑETA SUTIL -->
+    <darktable:vignette>5</darktable:vignette>
+
+  </rdf:Description>
+</x:xmpmeta>

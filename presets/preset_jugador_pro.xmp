@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:darktable="http://darktable.sf.net/">
+  <rdf:Description rdf:about="" xmlns:darktable="http://darktable.sf.net/">
+    <!-- Ajustes Pro para Jugador - Inspirados en CapCut -->
+
+    <!-- BRILLO Y CONTRASTE -->
+    <darktable:exposure>
+      <rdf:Seq>
+        <rdf:li>
+          <!-- Brillo: -2 -->
+          <darktable:value>-2</darktable:value>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:exposure>
+
+    <!-- CURVAS (para contraste +18) -->
+    <darktable:curves>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:curve>
+            <rdf:Seq>
+              <rdf:li>0.0, 0.0</rdf:li>
+              <rdf:li>0.25, 0.20</rdf:li>
+              <rdf:li>0.5, 0.5</rdf:li>
+              <rdf:li>0.75, 0.80</rdf:li>
+              <rdf:li>1.0, 1.0</rdf:li>
+            </rdf:Seq>
+          </darktable:curve>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:curves>
+
+    <!-- SATURACIÓN: +12 -->
+    <darktable:saturation>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:value>12</darktable:value>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:saturation>
+
+    <!-- TEMPERATURA: +10 (Warm/Calor) -->
+    <darktable:temperature>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:value>10</darktable:value>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:temperature>
+
+    <!-- MATIZ: +2 hacia rojo -->
+    <darktable:hue_shift>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:value>2</darktable:value>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:hue_shift>
+
+    <!-- NITIDEZ / SHARPENING: +15 -->
+    <darktable:sharpen>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:value>15</darktable:value>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:sharpen>
+
+    <!-- DESVANECER: +3 -->
+    <darktable:shadows_highlights>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:shadows>3</darktable:shadows>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:shadows_highlights>
+
+    <!-- SOMBRA REALISTA -->
+    <!-- Opacidad: 30%, Blur: alto, Distancia: corta, Dirección: hacia atrás -->
+    <darktable:shadows>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:opacity>0.30</darktable:opacity>
+          <darktable:blur>8</darktable:blur>
+          <darktable:distance>20</darktable:distance>
+          <darktable:direction>180</darktable:direction>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:shadows>
+
+    <!-- EFECTO WARM/SUNSET -->
+    <!-- Opacidad 25% -->
+    <darktable:color_zones>
+      <rdf:Seq>
+        <rdf:li>
+          <darktable:overlay>warm</darktable:overlay>
+          <darktable:opacity>0.25</darktable:opacity>
+        </rdf:li>
+      </rdf:Seq>
+    </darktable:color_zones>
+
+  </rdf:Description>
+</x:xmpmeta>
