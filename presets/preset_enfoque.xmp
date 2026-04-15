@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Darktable 4.6.1">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about="">
+      <dt:sharpen xmlns:dt="http://ns.darktable.com/module/1.0/" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">30.0</dt:sharpen>
+      <dt:contrast xmlns:dt="http://ns.darktable.com/module/1.0/" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">15.0</dt:contrast>
+      <dt:vibrance xmlns:dt="http://ns.darktable.com/module/1.0/" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">20.0</dt:vibrance>
+      <dt:saturation xmlns:dt="http://ns.darktable.com/module/1.0/" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">10.0</dt:saturation>
+      <dt:denoise xmlns:dt="http://ns.darktable.com/module/1.0/" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">15.0</dt:denoise>
+      <dt:localcontrast xmlns:dt="http://ns.darktable.com/module/1.0/" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">20.0</dt:localcontrast>
+      <dt:clarity xmlns:dt="http://ns.darktable.com/module/1.0/" rdf:datatype="http://www.w3.org/2001/XMLSchema#float">25.0</dt:clarity>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
