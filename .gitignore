@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Presets generados temporalmente
+/tmp/darkroom_uploads/*
+/tmp/darkroom_output/*
+/tmp/darkroom_presets/*.xmp
+!/tmp/darkroom_presets/.gitkeep
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
