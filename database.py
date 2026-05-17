@@ -5,9 +5,10 @@ Comparte la DB con FotoShow.
 import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
+from config import settings
 
 # Database URL (misma que FotoShow)
-DATABASE_URL = "postgresql+asyncpg://postgres:vLFNxunq9A06AJD8@db.gfriigyzsbfugahlriut.supabase.co:5432/postgres"
+DATABASE_URL = settings.database_url
 
 engine = create_async_engine(
     DATABASE_URL,

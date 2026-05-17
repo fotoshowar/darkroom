@@ -1,3 +1,5 @@
+Total output lines: 2219
+
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
 <head>
@@ -62,6 +64,12 @@
             <button class="btn btn-success w-100 mb-3" onclick="document.getElementById('subject-file').click()">
               <i class="bi bi-upload me-1"></i>Elegir Foto del Nene
             </button>
+            <div id="subject-upload-status" class="d-none mb-3">
+              <div class="progress" style="height:6px">
+                <div id="subject-upload-bar" class="progress-bar bg-success" role="progressbar" style="width:0%"></div>
+              </div>
+              <small class="d-block mt-1" id="subject-upload-text">Subiendo...</small>
+            </div>
             <div id="subject-preview-container" class="text-center d-none">
               <img id="subject-preview" src="" style="max-width:100%; max-height:300px; border-radius:8px;" class="mb-2"/>
               <small class="text-muted d-block" id="subject-info"></small>
@@ -86,6 +94,12 @@
             <button class="btn btn-success w-100 mb-3" onclick="document.getElementById('template-file').click()">
               <i class="bi bi-upload me-1"></i>Elegir Plantilla de Fondo
             </button>
+            <div id="template-upload-status" class="d-none mb-3">
+              <div class="progress" style="height:6px">
+                <div id="template-upload-bar" class="progress-bar bg-success" role="progressbar" style="width:0%"></div>
+              </div>
+              <small class="d-block mt-1" id="template-upload-text">Subiendo...</small>
+            </div>
             <div id="template-preview-container" class="text-center d-none">
               <img id="template-preview" src="" style="max-width:100%; max-height:300px; border-radius:8px;" class="mb-2"/>
               <small class="text-muted d-block" id="template-info"></small>
@@ -226,11 +240,11 @@
             <p class="text-muted small mb-3">
               <strong>Pasos:</strong><br/>
               1. Sube foto y plantilla<br/>
-              2. Ajusta con sliders<br/>
-              3. Posición/tamaño<br/>
+              2. En el preview: arrastrá para mover, esquinas para escalar<br/>
+              3. Afinar con sliders si querés<br/>
               4. Componer
             </p>
-            <button class="btn btn-warning fw-semibold w-100 mt-auto" onclick="startComposite()" id="composite-btn">
+            <button class="btn btn-warning fw-semibold w-100 mt-auto" onclick="startComposite()" id="composite-btn" disabled>
               <i class="bi bi-layers-fill me-1"></i>Componer Imágenes
             </button>
             <small class="text-muted mt-2" id="composite-message"></small>
@@ -239,645 +253,120 @@
       </div>
     </div>
 
-    <!-- Preview en vivo -->
-    <div class="card border mb-4" style="border-color:rgba(173,255,47,0.2)">
-      <div class="card-header">
-        <h5 class="card-title fw-bold mb-0">
-          <i class="bi bi-eye me-2" style="color:var(--fs-green)"></i>Vista Previa
-        </h5>
-      </div>
-      <div class="card-body text-center">
-        <div id="preview-container" class="d-none" style="max-width:100%; overflow-x:auto;">
-          <canvas id="preview-canvas" style="border:2px solid rgba(173,255,47,0.3); border-radius:8px; max-width:100%;"></canvas>
+    <!-- Ajustes de color por capa (Fase 3) -->
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="card border" style="border-color:rgba(173,255,47,0.2)">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0">
+              <i class="bi bi-droplet-half me-2" style="color:var(--fs-green)"></i>Color · Jugador
+            </h5>
+            <small id="subject-color-status" class="text-muted"></small>
+          </div>
+          <div class="card-body">
+            <div class="mb-2">
+              <label class="form-label small mb-1">Brillo <span id="adj-subject-brightness-val" class="text-muted">1.00</span></label>
+              <input type="range" id="adj-subject-brightness" class="form-range" min="0.5" max="1.5" step="0.01" value="1.00" oninput="onAdjustSlider('subject','brightness',this.value)"/>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small mb-1">Contraste <span id="adj-subject-contrast-val" class="text-muted">1.00</span></label>
+              <input type="range" id="adj-subject-contrast" class="form-range" min="0.5" max="2.0" step="0.01" value="1.00" oninput="onAdjustSlider('subject','contrast',this.value)"/>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small mb-1">Saturación <span id="adj-subject-saturation-val" class="text-muted">1.00</span></label>
+              <input type="range" id="adj-subject-saturation" class="form-range" min="0.0" max="2.0" step="0.01" value="1.00" oninput="onAdjustSlider('subject','saturation',this.value)"/>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-success btn-sm flex-grow-1" onclick="applyColorAdjustments('subject')" id="apply-color-subject-btn">
+                <i class="bi bi-check2 me-1"></i>Aplicar
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="resetColorAdjustments('subject')">
+                <i class="bi bi-arrow-counterclockwise"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <div id="preview-placeholder" class="py-4">
-          <i class="bi bi-image fs-1 d-block mb-2 text-muted opacity-50"></i>
-          <p class="text-muted mb-0">El preview aparecerá aquí cuando subas ambas imágenes</p>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="card border" style="border-color:rgba(173,255,47,0.2)">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0">
+              <i class="bi bi-droplet-half me-2" style="color:var(--fs-green)"></i>Color · Fondo
+            </h5>
+            <small id="template-color-status" class="text-muted"></small>
+          </div>
+          <div class="card-body">
+            <div class="mb-2">
+              <label class="form-label small mb-1">Brillo <span id="adj-template-brightness-val" class="text-muted">1.00</span></label>
+              <input type="range" id="adj-template-brightness" class="form-range" min="0.5" max="1.5" step="0.01" value="1.00" oninput="onAdjustSlider('template','brightness',this.value)"/>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small mb-1">Contraste <span id="adj-template-contrast-val" class="text-muted">1.00</span></label>
+              <input type="range" id="adj-template-contrast" class="form-range" min="0.5" max="2.0" step="0.01" value="1.00" oninput="onAdjustSlider('template','contrast',this.value)"/>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small mb-1">Saturación <span id="adj-template-saturation-val" class="text-muted">1.00</span></label>
+              <input type="range" id="adj-template-saturation" class="form-range" min="0.0" max="2.0" step="0.01" value="1.00" oninput="onAdjustSlider('template','saturation',this.value)"/>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-success btn-sm flex-grow-1" onclick="applyColorAdjustments('template')" id="apply-color-template-btn">
+                <i class="bi bi-check2 me-1"></i>Aplicar
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="resetColorAdjustments('template')">
+                <i class="bi bi-arrow-counterclockwise"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Resultado -->
-    <div class="card border" style="border-color:rgba(173,255,47,0.2)">
-      <div class="card-header">
-        <h5 class="card-title fw-bold mb-0">
-          <i class="bi bi-image-fill me-2" style="color:var(--fs-green)"></i>Resultado
-        </h5>
-      </div>
-      <div class="card-body text-center">
-        <div id="result-loading" class="d-none">
-          <div class="spinner-border text-warning mb-3" role="status">
-            <span class="visually-hidden">Procesando...</span>
+    <!-- Sombra y bordes (Fase 4) -->
+    <div class="row">
+      <div class="col-12 mb-4">
+        <div class="card border" style="border-color:rgba(173,255,47,0.2)">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0">
+              <i class="bi bi-fonts me-2" style="color:var(--fs-green)"></i>Sombra y Bordes
+            </h5>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="shadow-enabled" onchange="onShadowToggle()"/>
+              <label class="form-check-label small" for="shadow-enabled">Sombra activa</label>
+            </div>
           </div>
-          <p class="text-muted">Procesando imágenes...</p>
-        </div>
-        <div id="result-container" class="d-none">
-          <img id="result-image" src="" style="max-width:100%; max-height:500px; border-radius:8px;" class="mb-3"/>
-          <div class="mb-3">
-            <button class="btn btn-info btn-sm w-100" onclick="applyFinalIntegration()">
-              <i class="bi bi-magic me-1"></i>Integración Final (Unificar)
-            </button>
-            <small class="text-muted d-block mt-2" id="integration-message"></small>
-          </div>
-          <div>
-            <button class="btn btn-success" onclick="downloadResult()" id="download-btn">
-              <i class="bi bi-download me-1"></i>Descargar Imagen
-            </button>
-            <button class="btn btn-secondary ms-2" onclick="resetComposite()">
-              <i class="bi bi-arrow-clockwise me-1"></i>Nueva Composición
-            </button>
-          </div>
-        </div>
-        <div id="result-empty" class="text-center py-4">
-          <i class="bi bi-inbox fs-1 d-block mb-2 text-muted opacity-50"></i>
-          <p class="text-muted mb-0">El resultado aparecerá aquí</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sección: Presets -->
-  <div id="section-presets" class="mb-4">
-    <div class="card border" style="border-color:rgba(173,255,47,0.2)">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="card-title fw-bold mb-0">
-          <i class="bi bi-collection me-2" style="color:var(--fs-green)"></i>Mis Presets
-        </h5>
-        <button class="btn btn-sm btn-success" onclick="document.getElementById('preset-upload').click()">
-          <i class="bi bi-plus me-1"></i>Subir Preset
-        </button>
-      </div>
-      <input type="file" id="preset-upload" class="d-none" accept=".xmp" onchange="uploadPreset(event)"/>
-      <div class="card-body">
-        <div id="presets-loading" class="text-center py-3">
-          <div class="spinner-border text-success" role="status">
-            <span class="visually-hidden">Cargando...</span>
-          </div>
-        </div>
-        <div id="presets-empty" class="text-center py-4 d-none">
-          <i class="bi bi-images fs-1 d-block mb-2 text-muted opacity-50"></i>
-          <p class="text-muted mb-0">No tenés presets aún</p>
-        </div>
-        <div id="presets-list" class="row g-3"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sección: Procesar -->
-  <div id="section-process" class="mb-4 d-none">
-    <div class="card border" style="border-color:rgba(173,255,47,0.2)">
-      <div class="card-header">
-        <h5 class="card-title fw-bold mb-0">
-          <i class="bi bi-play me-2" style="color:var(--fs-green)"></i>Procesar Fotos
-        </h5>
-      </div>
-      <div class="card-body">
-        <form id="process-form">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Seleccionar Preset</label>
-            <select id="preset-select" class="form-select" required>
-              <option value="">Elegí un preset...</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">IDs de Fotos (separados por coma)</label>
-            <textarea id="photo-ids" class="form-control" rows="3" 
-                      placeholder="Ej: 123, 456, 789" required></textarea>
-            <small class="text-muted">Los IDs de las fotos de la galería</small>
-          </div>
-          <button type="button" class="btn btn-success fw-semibold w-100" onclick="startProcessing()">
-            <i class="bi bi-play-circle me-1"></i>Iniciar Procesamiento
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Trabajos -->
-    <div class="card border mt-4" style="border-color:rgba(173,255,47,0.2)">
-      <div class="card-header">
-        <h5 class="card-title fw-bold mb-0">
-          <i class="bi bi-list-task me-2" style="color:var(--fs-green)"></i>Trabajos
-        </h5>
-      </div>
-      <div class="card-body">
-        <div id="jobs-loading" class="text-center py-3">
-          <div class="spinner-border text-success" role="status">
-            <span class="visually-hidden">Cargando...</span>
-          </div>
-        </div>
-        <div id="jobs-empty" class="text-center py-4 d-none">
-          <i class="bi bi-clipboard-x fs-1 d-block mb-2 text-muted opacity-50"></i>
-          <p class="text-muted mb-0">No hay trabajos aún</p>
-        </div>
-        <div id="jobs-list"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-const API_BASE = '/api';
-
-// Estado de composición
-let compositeState = {
-  subjectFile: null,
-  templateFile: null,
-  subjectFilename: null,          // Filename de la versión SIN FONDO (guardada en servidor)
-  subjectNoBgFilename: null,      // Filename de la versión sin fondo
-  templateFilename: null,         // Filename de la plantilla (guardada en servidor)
-  resultFilename: null,
-
-  // Imágenes cargadas para preview
-  subjectImg: null,
-  templateImg: null,
-
-  // Presets aplicados
-  subjectWithPreset: null,        // Filename del sujeto con preset aplicado
-  templateWithPreset: null        // Filename de la plantilla con preset aplicado
-};
-
-// Recuperar estado guardado en localStorage
-function loadCompositeState() {
-  try {
-    const saved = localStorage.getItem('compositeState');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      compositeState.subjectNoBgFilename = parsed.subjectNoBgFilename || null;
-      compositeState.templateFilename = parsed.templateFilename || null;
-      console.log('Estado recuperado del localStorage:', compositeState);
-    }
-  } catch (e) {
-    console.error('Error recuperando estado:', e);
-  }
-}
-
-// Guardar estado en localStorage
-function saveCompositeState() {
-  try {
-    localStorage.setItem('compositeState', JSON.stringify({
-      subjectNoBgFilename: compositeState.subjectNoBgFilename,
-      templateFilename: compositeState.templateFilename
-    }));
-    console.log('Estado guardado en localStorage');
-  } catch (e) {
-    console.error('Error guardando estado:', e);
-  }
-}
-
-function showSection(name) {
-  document.querySelectorAll('#section-composite, #section-presets, #section-process').forEach(el => el.classList.add('d-none'));
-  document.getElementById('section-' + name).classList.remove('d-none');
-
-  if (name === 'presets') loadPresets();
-  if (name === 'process') loadJobs();
-}
-
-// ── FUNCIONES DE COMPOSICIÓN ────────────────────────────────────────────
-
-async function loadSubject(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  compositeState.subjectFile = file;
-
-  // Preview local (imagen original con fondo)
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('subject-preview').src = e.target.result;
-    document.getElementById('subject-preview-container').classList.remove('d-none');
-    document.getElementById('subject-placeholder').classList.add('d-none');
-
-    const img = new Image();
-    img.onload = () => {
-      document.getElementById('subject-info').textContent = `${img.width}x${img.height}px (extrayendo fondo...)`;
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-
-  // Subir al servidor para extracción de fondo
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    showMessage('Extrayendo fondo...', 'info');
-    const r = await fetch(API_BASE + '/extract-background', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!r.ok) {
-      const err = await r.json();
-      throw new Error(err.detail || 'Error al extraer fondo');
-    }
-
-    const data = await r.json();
-    console.log('Extract background response:', data);
-    if (data.success) {
-      // Guardar filename de la versión sin fondo
-      compositeState.subjectNoBgFilename = data.filename;
-      console.log('Subject filename saved:', compositeState.subjectNoBgFilename);
-      saveCompositeState(); // ← GUARDAR EN LOCALSTORAGE
-      document.getElementById('subject-info').textContent = `${data.width}x${data.height}px (sin fondo) ✅`;
-      showMessage('✅ Fondo extraído exitosamente', 'success');
-
-      // Cargar imagen sin fondo para preview
-      loadImageForPreview(data.filename, true);
-    } else {
-      throw new Error(data.message);
-    }
-  } catch(e) {
-    console.error('Error en loadSubject:', e);
-    showMessage('❌ ' + e.message, 'error');
-    document.getElementById('subject-info').textContent = 'Error al extraer fondo';
-  }
-}
-
-async function loadTemplate(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  compositeState.templateFile = file;
-
-  // Preview local
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('template-preview').src = e.target.result;
-    document.getElementById('template-preview-container').classList.remove('d-none');
-    document.getElementById('template-placeholder').classList.add('d-none');
-
-    const img = new Image();
-    img.onload = () => {
-      document.getElementById('template-info').textContent = `${img.width}x${img.height}px`;
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-
-  // Subir plantilla al servidor
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    const r = await fetch(API_BASE + '/upload-image', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!r.ok) {
-      const err = await r.json();
-      throw new Error(err.detail || 'Error al subir plantilla');
-    }
-
-    const data = await r.json();
-    console.log('Upload template response:', data);
-    if (data.success) {
-      compositeState.templateFilename = data.filename;
-      console.log('Template filename saved:', compositeState.templateFilename);
-      saveCompositeState(); // ← GUARDAR EN LOCALSTORAGE
-
-      // Cargar imagen de plantilla para preview
-      loadImageForPreview(data.filename, false);
-    } else {
-      throw new Error(data.message);
-    }
-  } catch(e) {
-    console.error('Error en loadTemplate:', e);
-    showMessage('❌ Error al subir plantilla: ' + e.message, 'error');
-  }
-}
-
-// ── APLICAR PRESETS DARKTABLE ──────────────────────────────────────
-
-async function applyPresets() {
-  const presetJugador = document.getElementById('preset-jugador').value;
-  const presetPlantilla = document.getElementById('preset-plantilla').value;
-
-  const msgEl = document.getElementById('preset-message');
-
-  if (!presetJugador && !presetPlantilla) {
-    msgEl.textContent = 'Selecciona al menos un preset';
-    msgEl.className = 'text-warning';
-    return;
-  }
-
-  if (!compositeState.subjectNoBgFilename && presetJugador) {
-    msgEl.textContent = '❌ Sube la foto del jugador primero';
-    msgEl.className = 'text-danger';
-    return;
-  }
-
-  if (!compositeState.templateFilename && presetPlantilla) {
-    msgEl.textContent = '❌ Sube la plantilla primero';
-    msgEl.className = 'text-danger';
-    return;
-  }
-
-  msgEl.textContent = '⏳ Aplicando presets...';
-  msgEl.className = 'text-info';
-
-  try {
-    // Aplicar preset al jugador
-    if (presetJugador && compositeState.subjectNoBgFilename) {
-      const params1 = new URLSearchParams();
-      params1.append('image_filename', compositeState.subjectNoBgFilename);
-      params1.append('preset_id', presetJugador);
-
-      const r1 = await fetch(API_BASE + '/apply-preset?' + params1.toString(), {
-        method: 'POST'
-      });
-
-      if (r1.ok) {
-        const data1 = await r1.json();
-        if (data1.success) {
-          compositeState.subjectWithPreset = data1.filename;
-          console.log('Preset jugador aplicado:', data1.filename);
-        }
-      }
-    } else {
-      compositeState.subjectWithPreset = null;
-    }
-
-    // Aplicar preset a la plantilla
-    if (presetPlantilla && compositeState.templateFilename) {
-      const params2 = new URLSearchParams();
-      params2.append('image_filename', compositeState.templateFilename);
-      params2.append('preset_id', presetPlantilla);
-
-      const r2 = await fetch(API_BASE + '/apply-preset?' + params2.toString(), {
-        method: 'POST'
-      });
-
-      if (r2.ok) {
-        const data2 = await r2.json();
-        if (data2.success) {
-          compositeState.templateWithPreset = data2.filename;
-          console.log('Preset plantilla aplicado:', data2.filename);
-        }
-      }
-    } else {
-      compositeState.templateWithPreset = null;
-    }
-
-    msgEl.textContent = '✅ Presets aplicados. Ya puedes componer.';
-    msgEl.className = 'text-success';
-
-  } catch(e) {
-    console.error('Error aplicando presets:', e);
-    msgEl.textContent = '❌ Error: ' + e.message;
-    msgEl.className = 'text-danger';
-  }
-}
-
-async function startComposite() {
-  console.log('Debug:', {
-    subjectNoBgFilename: compositeState.subjectNoBgFilename,
-    templateFilename: compositeState.templateFilename,
-    subjectWithPreset: compositeState.subjectWithPreset,
-    templateWithPreset: compositeState.templateWithPreset
-  });
-
-  if (!compositeState.subjectNoBgFilename || !compositeState.templateFilename) {
-    alert('❌ Debes subir ambas imágenes:\n\n1. Sujeto: ' + (compositeState.subjectNoBgFilename ? '✅' : '❌') + '\n2. Plantilla: ' + (compositeState.templateFilename ? '✅' : '❌'));
-    return;
-  }
-
-  const scalePercent = parseInt(document.getElementById('composite-scale').value) || 100;
-  const offsetX = parseInt(document.getElementById('composite-offset-x').value) || 0;
-  const offsetY = parseInt(document.getElementById('composite-offset-y').value) || 0;
-
-  // Usar imágenes con preset si están disponibles, si no usar las originales
-  const subjectFinal = compositeState.subjectWithPreset || compositeState.subjectNoBgFilename;
-  const templateFinal = compositeState.templateWithPreset || compositeState.templateFilename;
-
-  const payload = {
-    subject_filename: subjectFinal,
-    template_filename: templateFinal,
-    scale_percent: scalePercent,
-    offset_x: offsetX,
-    offset_y: offsetY
-  };
-
-  try {
-    document.getElementById('result-loading').classList.remove('d-none');
-    document.getElementById('result-container').classList.add('d-none');
-    document.getElementById('result-empty').classList.add('d-none');
-
-    const r = await fetch(API_BASE + '/composite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!r.ok) {
-      const err = await r.json();
-      throw new Error(err.detail || 'Error al componer');
-    }
-
-    const data = await r.json();
-    if (data.success) {
-      compositeState.resultFilename = data.filename;
-      document.getElementById('result-image').src = API_BASE + '/download/' + data.filename;
-
-      document.getElementById('result-loading').classList.add('d-none');
-      document.getElementById('result-container').classList.remove('d-none');
-      document.getElementById('result-empty').classList.add('d-none');
-
-      showMessage('✅ Composición creada exitosamente', 'success');
-    } else {
-      throw new Error(data.message);
-    }
-  } catch(e) {
-    document.getElementById('result-loading').classList.add('d-none');
-    document.getElementById('result-empty').classList.remove('d-none');
-    showMessage('❌ ' + e.message, 'error');
-  }
-}
-
-async function applyFinalIntegration() {
-  if (!compositeState.resultFilename) {
-    alert('❌ No hay resultado para integrar');
-    return;
-  }
-
-  const msgEl = document.getElementById('integration-message');
-  msgEl.textContent = '⏳ Aplicando integración final...';
-  msgEl.className = 'text-info';
-
-  try {
-    const params = new URLSearchParams();
-    params.append('image_filename', compositeState.resultFilename);
-    params.append('preset_id', 'integracion_bien');
-
-    const r = await fetch(API_BASE + '/apply-preset?' + params.toString(), {
-      method: 'POST'
-    });
-
-    if (r.ok) {
-      const data = await r.json();
-      if (data.success) {
-        // Actualizar imagen con el resultado integrado
-        compositeState.resultFilename = data.filename;
-        document.getElementById('result-image').src = API_BASE + '/download/' + data.filename + '?t=' + Date.now();
-        msgEl.textContent = '✅ Integración aplicada. La foto ahora se ve más unificada.';
-        msgEl.className = 'text-success';
-      }
-    } else {
-      throw new Error('Error al aplicar integración');
-    }
-  } catch(e) {
-    console.error('Error:', e);
-    msgEl.textContent = '❌ Error: ' + e.message;
-    msgEl.className = 'text-danger';
-  }
-}
-
-async function downloadResult() {
-  if (!compositeState.resultFilename) {
-    alert('❌ No hay resultado para descargar');
-    return;
-  }
-
-  const link = document.createElement('a');
-  link.href = API_BASE + '/download/' + compositeState.resultFilename;
-  link.download = 'resultado_compuesto.jpg';
-  link.click();
-}
-
-function resetComposite() {
-  compositeState = {
-    subjectFile: null,
-    templateFile: null,
-    subjectFilename: null,
-    subjectNoBgFilename: null,
-    templateFilename: null,
-    resultFilename: null,
-    subjectImg: null,
-    templateImg: null
-  };
-
-  // LIMPIAR LOCALSTORAGE
-  localStorage.removeItem('compositeState');
-
-  document.getElementById('subject-file').value = '';
-  document.getElementById('template-file').value = '';
-  document.getElementById('composite-scale').value = '100';
-  document.getElementById('composite-offset-x').value = '0';
-  document.getElementById('composite-offset-y').value = '0';
-
-  syncInputs();
-
-  document.getElementById('subject-preview-container').classList.add('d-none');
-  document.getElementById('subject-placeholder').classList.remove('d-none');
-  document.getElementById('template-preview-container').classList.add('d-none');
-  document.getElementById('template-placeholder').classList.remove('d-none');
-  document.getElementById('preview-container').classList.add('d-none');
-  document.getElementById('preview-placeholder').classList.remove('d-none');
-  document.getElementById('result-container').classList.add('d-none');
-  document.getElementById('result-empty').classList.remove('d-none');
-  document.getElementById('result-loading').classList.add('d-none');
-
-  showMessage('', '');
-}
-
-function showMessage(text, type) {
-  const msgEl = document.getElementById('composite-message');
-  msgEl.textContent = text;
-  msgEl.className = 'text-' + (type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info') + ' mt-2 small';
-}
-
-// ── PREVIEW EN VIVO ────────────────────────────────────────────────────────
-
-function updatePreview() {
-  // Cuando se mueve un slider, sincronizar el input numérico y dibujar preview
-  const scale = parseInt(document.getElementById('composite-scale').value) || 100;
-  const offsetX = parseInt(document.getElementById('composite-offset-x').value) || 0;
-  const offsetY = parseInt(document.getElementById('composite-offset-y').value) || 0;
-
-  // Actualizar inputs numéricos con valores de sliders
-  document.getElementById('composite-scale-num').value = scale;
-  document.getElementById('composite-offset-x-num').value = offsetX;
-  document.getElementById('composite-offset-y-num').value = offsetY;
-
-  console.log('Preview updated:', { scale, offsetX, offsetY });
-
-  // Dibujar preview si ambas imágenes están cargadas
-  if (compositeState.subjectImg && compositeState.templateImg) {
-    drawPreview();
-  }
-}
-
-function syncInputs() {
-  // Cuando se cambia un input numérico, sincronizar el slider
-  const scale = parseInt(document.getElementById('composite-scale-num').value) || 100;
-  const offsetX = parseInt(document.getElementById('composite-offset-x-num').value) || 0;
-  const offsetY = parseInt(document.getElementById('composite-offset-y-num').value) || 0;
-
-  // Actualizar sliders con valores numéricos
-  document.getElementById('composite-scale').value = scale;
-  document.getElementById('composite-offset-x').value = offsetX;
-  document.getElementById('composite-offset-y').value = offsetY;
-
-  console.log('Inputs synced:', { scale, offsetX, offsetY });
-
-  // Dibujar preview
-  if (compositeState.subjectImg && compositeState.templateImg) {
-    drawPreview();
-  }
-}
-
-function drawPreview() {
-  const canvas = document.getElementById('preview-canvas');
-  const ctx = canvas.getContext('2d');
-
-  if (!compositeState.templateImg || !compositeState.subjectImg) return;
-
-  // Configurar canvas con tamaño de la plantilla
-  const templateImg = compositeState.templateImg;
-  canvas.width = Math.min(templateImg.width, 800);  // Max 800px de ancho en preview
-  canvas.height = (canvas.width / templateImg.width) * templateImg.height;
-
-  // Escala para fit en canvas
-  const canvasScale = canvas.width / templateImg.width;
-
-  // Limpiar canvas
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Dibujar plantilla
-  ctx.drawImage(
-    templateImg,
-    0, 0,
-    canvas.width, canvas.height
-  );
-
-  // Obtener parámetros de composición
-  const scalePercent = parseInt(document.getElementById('composite-scale').value) || 100;
-  const offsetX = parseInt(document.getElementById('composite-offset-x').value) || 0;
-  const offsetY = parseInt(document.getElementById('composite-offset-y').value) || 0;
-
-  const subjectImg = compositeState.subjectImg;
-
-  // Calcular ancho basado en porcentaje
-  const width = (subjectImg.width * scalePercent) / 100;
-  const height = (subjectImg.height * scalePercent) / 100;
-
-  // Calcular posición centrada
-  const centerX = (templateImg.width - width) / 2 + offsetX;
-  const centerY = (templateImg.height - height) / 2 + offsetY;
-
-  // Dibujar sujeto sin fondo (centrado)
-  ctx.drawImage(
-    subjectImg,
-    centerX * canvasScale, centerY * canvasScale,
-    width * canvasScale, height * canvasScale
-  );
-
-  // Mostrar preview
-  document.getElementById('preview-container').classList.remove('d-none');
-  document.getElementById('preview-placeholder').classList.add('d-none');
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-2">
+                  <label class="form-label small mb-1">Opacidad sombra <span id="shadow-opacity-val" class="text-muted">0.40</span></label>
+                  <input type="range" id="shadow-opacity" class="form-range" min="0" max="1" step="0.01" value="0.40" oninput="onShadowSlider()"/>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small mb-1">Blur sombra (px) <span id="shadow-blur-val" class="text-muted">15</span></label>
+                  <input type="range" id="shadow-blur" class="form-range" min="0" max="60" step="1" value="15" oninput="onShadowSlider()"/>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-2">
+                  <label class="form-label small mb-1">Offset X (px) <span id="shadow-offset-x-val" class="text-muted">10</span></label>
+                  <input type="range" id="shadow-offset-x" class="form-range" min="-80" max="80" step="1" value="10" oninput="onShadowSlider()"/>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small mb-1">Offset Y (px) <span id="shadow-offset-y-val" class="text-muted">20</span></label>
+                  <input type="range" id="shadow-offset-y" class="form-range" min="-80" max="80" step="1" value="20" oninput="onShadowSlider()"/>
+                </div>
+              </div>
+            </div>
+            <hr class="my-2"/>
+            <div class="mb-2">
+              <label class="form-label small mb-1">Feather del recorte (px) <span id="feather-radius-val" class="text-muted">0</span></label>
+              <input type="range" id="feather-radius" class="form-range" min="0" max="20" step="0.5" value="0" oninput="onFeatherSlider()"/>
+              <small class="text-muted">Suaviza el borde duro del recorte del nene.</small>
+            </div>
+          </d…12749 tokens truncated…Math.round(tlY - (tImg.height - h) / 2);
+  setSliderAndNum('composite-offset-x', 'composite-offset-x-num', offsetX);
+  setSliderAndNum('composite-offset-y', 'composite-offset-y-num', offsetY);
 }
 
 function loadImageForPreview(filename, isSubject) {
@@ -966,48 +455,124 @@ async function uploadPreset(event) {
       method: 'POST',
       body: formData
     });
-    
+
     if (!r.ok) {
       const err = await r.json();
       throw new Error(err.detail || 'Error al subir preset');
     }
-    
+
     const data = await r.json();
     alert('✅ Preset subido exitosamente');
-    loadPresets();
+    // Cargar presets cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadPresets);
+} else {
+  loadPresets();
+}
   } catch(e) {
     alert('❌ Error: ' + e.message);
   }
 }
 
+function showCreatePresetModal() {
+  const modal = new bootstrap.Modal(document.getElementById('createPresetModal'));
+  modal.show();
+}
+
+async function saveCustomPreset() {
+  const name = document.getElementById('preset-name').value;
+  const brightness = parseFloat(document.getElementById('preset-brightness').value);
+  const contrast = parseFloat(document.getElementById('preset-contrast').value);
+  const saturation = parseFloat(document.getElementById('preset-saturation').value);
+  const sharpness = parseFloat(document.getElementById('preset-sharpness').value);
+
+  if (!name) {
+    alert('❌ Ingresa un nombre para el preset');
+    return;
+  }
+
+  const msgEl = document.getElementById('preset-create-message');
+  msgEl.innerHTML = '⏳ Guardando preset...';
+
+  try {
+    const r = await fetch(API_BASE + '/presets/create-custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        brightness: brightness,
+        contrast: contrast,
+        saturation: saturation,
+        sharpness: sharpness
+      })
+    });
+
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || 'Error al crear preset');
+    }
+
+    msgEl.innerHTML = '✅ Preset guardado!';
+    setTimeout(() => {
+      bootstrap.Modal.getInstance(document.getElementById('createPresetModal')).hide();
+      document.getElementById('preset-name').value = '';
+      document.getElementById('preset-brightness').value = '1.0';
+      document.getElementById('preset-contrast').value = '1.0';
+      document.getElementById('preset-saturation').value = '1.0';
+      document.getElementById('preset-sharpness').value = '1.0';
+      loadPresets();
+    }, 1500);
+  } catch(e) {
+    msgEl.innerHTML = '❌ ' + e.message;
+  }
+}
+
 async function startProcessing() {
   const presetId = document.getElementById('preset-select').value;
-  const photoIds = document.getElementById('photo-ids').value
-    .split(',')
-    .map(id => parseInt(id.trim()))
-    .filter(id => !isNaN(id));
-  
-  if (!presetId) { alert('Seleccioná un preset'); return; }
-  if (!photoIds.length) { alert('Ingresá IDs de fotos válidos'); return; }
-  
+  const photoIds = Array.from(selectedPhotos);
+
+  const msgEl = document.getElementById('process-message');
+
+  if (!presetId) {
+    msgEl.textContent = '❌ Selecciona un preset';
+    msgEl.className = 'text-danger';
+    return;
+  }
+
+  if (!photoIds.length) {
+    msgEl.textContent = '❌ Selecciona al menos una foto';
+    msgEl.className = 'text-danger';
+    return;
+  }
+
   try {
+    msgEl.textContent = '⏳ Iniciando procesamiento...';
+    msgEl.className = 'text-info';
+
     const r = await fetch(API_BASE + '/process', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ preset_id: presetId, photo_ids: photoIds })
     });
-    
+
     if (!r.ok) {
       const err = await r.json();
       throw new Error(err.detail || 'Error al iniciar procesamiento');
     }
-    
+
     const data = await r.json();
-    alert('✅ Procesamiento iniciado: ' + data.job_id);
-    document.getElementById('process-form').reset();
+    msgEl.textContent = `✅ Procesamiento iniciado (Job: ${data.job_id})`;
+    msgEl.className = 'text-success';
+
+    // Limpiar selección y recargar trabajos
+    selectedPhotos.clear();
+    updatePhotoSelection();
+    document.getElementById('preset-select').value = '';
     loadJobs();
   } catch(e) {
-    alert('❌ Error: ' + e.message);
+    console.error('Error:', e);
+    msgEl.textContent = `❌ Error: ${e.message}`;
+    msgEl.className = 'text-danger';
   }
 }
 
@@ -1026,25 +591,52 @@ async function loadJobs() {
     }
     
     document.getElementById('jobs-empty').classList.add('d-none');
-    document.getElementById('jobs-list').innerHTML = Object.entries(jobs).map(([jobId, job]) => `
-      <div class="card mb-2">
-        <div class="card-body py-2">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="card-title fw-bold mb-0">${jobId}</h6>
-              <small class="text-muted">
-                <span class="badge ${job.status === 'completed' ? 'bg-success' : job.status === 'failed' ? 'bg-danger' : 'bg-primary'}">
-                  ${job.status}
-                </span>
-                ${job.progress ? Math.round(job.progress * 100) + '%' : ''}
-              </small>
+
+    const jobsHtml = Object.entries(jobs).map(([jobId, job]) => {
+      let resultHtml = '';
+      if (job.output_urls && job.output_urls.length > 0) {
+        resultHtml = `
+          <div class="mt-2">
+            <small class="text-success fw-bold">Resultados:</small>
+            <div class="row g-2 mt-1">
+              ${job.output_urls.map(url => {
+                const fullUrl = url.startsWith('http') ? url : API_BASE + '/' + url;
+                return `
+                  <div class="col-4">
+                    <a href="${fullUrl}" target="_blank" rel="noopener">
+                      <img src="${fullUrl}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;" alt="Resultado"/>
+                    </a>
+                  </div>
+                `;
+              }).join('')}
             </div>
-            <small class="text-muted">${job.processed_photos}/${job.total_photos} fotos</small>
           </div>
-          ${job.message ? `<small class="text-muted d-block mt-1">${job.message}</small>` : ''}
+        `;
+      }
+
+      return `
+        <div class="card mb-2">
+          <div class="card-body py-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="card-title fw-bold mb-0">${jobId}</h6>
+                <small class="text-muted">
+                  <span class="badge ${job.status === 'completed' ? 'bg-success' : job.status === 'failed' ? 'bg-danger' : 'bg-primary'}">
+                    ${job.status}
+                  </span>
+                  ${job.progress ? Math.round(job.progress * 100) + '%' : ''}
+                </small>
+              </div>
+              <small class="text-muted">${job.processed_photos}/${job.total_photos} fotos</small>
+            </div>
+            ${job.message ? `<small class="text-muted d-block mt-1">${job.message}</small>` : ''}
+            ${resultHtml}
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    document.getElementById('jobs-list').innerHTML = jobsHtml;
     
   } catch(e) {
     console.error('Error cargando trabajos:', e);
@@ -1183,9 +775,144 @@ async function saveAdjustmentPreset() {
   document.getElementById('adjustments-message').textContent = `✅ Preset "${presetName}" guardado en el navegador`;
 }
 
+// ── SOMBRA + FEATHER (Fase 4) ─────────────────────────────────────────
+
+function getShadowState() {
+  const en = document.getElementById('shadow-enabled');
+  return {
+    enabled: !!(en && en.checked),
+    opacity: parseFloat(document.getElementById('shadow-opacity').value || '0'),
+    blur:    parseFloat(document.getElementById('shadow-blur').value || '0'),
+    offX:    parseInt(document.getElementById('shadow-offset-x').value || '0'),
+    offY:    parseInt(document.getElementById('shadow-offset-y').value || '0'),
+  };
+}
+function getFeatherRadius() {
+  return parseFloat(document.getElementById('feather-radius')?.value || '0');
+}
+function onShadowToggle() {
+  if (compositeState.subjectImg && compositeState.templateImg) drawPreview();
+}
+function onShadowSlider() {
+  document.getElementById('shadow-opacity-val').textContent = parseFloat(document.getElementById('shadow-opacity').value).toFixed(2);
+  document.getElementById('shadow-blur-val').textContent = document.getElementById('shadow-blur').value;
+  document.getElementById('shadow-offset-x-val').textContent = document.getElementById('shadow-offset-x').value;
+  document.getElementById('shadow-offset-y-val').textContent = document.getElementById('shadow-offset-y').value;
+  if (compositeState.subjectImg && compositeState.templateImg) drawPreview();
+}
+function onFeatherSlider() {
+  document.getElementById('feather-radius-val').textContent = document.getElementById('feather-radius').value;
+  if (compositeState.subjectImg && compositeState.templateImg) drawPreview();
+}
+
+// ── AJUSTES DE COLOR POR CAPA (Fase 3) ────────────────────────────────
+
+// Actualizar etiqueta numérica al lado del slider
+function onAdjustSlider(layer, prop, value) {
+  const el = document.getElementById(`adj-${layer}-${prop}-val`);
+  if (el) el.textContent = parseFloat(value).toFixed(2);
+}
+
+// Leer los valores actuales de los sliders de una capa
+function readAdjustValues(layer) {
+  return {
+    brightness: parseFloat(document.getElementById(`adj-${layer}-brightness`).value),
+    contrast:   parseFloat(document.getElementById(`adj-${layer}-contrast`).value),
+    saturation: parseFloat(document.getElementById(`adj-${layer}-saturation`).value),
+  };
+}
+
+// Resetear sliders UI a 1.00 (no toca el estado de filenames)
+function resetColorSlidersUI(layer) {
+  for (const prop of ['brightness', 'contrast', 'saturation']) {
+    const s = document.getElementById(`adj-${layer}-${prop}`);
+    const v = document.getElementById(`adj-${layer}-${prop}-val`);
+    if (s) s.value = '1.00';
+    if (v) v.textContent = '1.00';
+  }
+}
+
+// Archivo base sobre el que aplicar ajustes (preset si hay, si no original)
+function getColorBaseFilename(layer) {
+  if (layer === 'subject') {
+    return compositeState.subjectWithPreset || compositeState.subjectNoBgFilename;
+  }
+  return compositeState.templateWithPreset || compositeState.templateFilename;
+}
+
+async function applyColorAdjustments(layer) {
+  const base = getColorBaseFilename(layer);
+  const statusEl = document.getElementById(`${layer}-color-status`);
+  const btn = document.getElementById(`apply-color-${layer}-btn`);
+  if (!base) {
+    if (statusEl) { statusEl.textContent = 'Subí la imagen primero'; statusEl.className = 'text-danger'; }
+    return;
+  }
+  const vals = readAdjustValues(layer);
+  btn.disabled = true;
+  if (statusEl) { statusEl.textContent = 'Aplicando...'; statusEl.className = 'text-info'; }
+  try {
+    const r = await fetch(API_BASE + '/adjust-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image_filename: base,
+        brightness: vals.brightness,
+        contrast: vals.contrast,
+        saturation: vals.saturation
+      })
+    });
+    if (!r.ok) {
+      let detail = `HTTP ${r.status}`;
+      try { const err = await r.json(); detail = err.detail || detail; } catch(_) {}
+      throw new Error(detail);
+    }
+    const data = await r.json();
+    if (!data.success) throw new Error(data.message || 'Respuesta inválida');
+
+    if (layer === 'subject') compositeState.subjectAdjusted = data.filename;
+    else compositeState.templateAdjusted = data.filename;
+    saveCompositeState();
+
+    // Refrescar el preview canvas con la versión ajustada
+    const isSubject = layer === 'subject';
+    const current = isSubject ? compositeState.currentSubject : compositeState.currentTemplate;
+    if (current) loadImageForPreview(current, isSubject);
+
+    if (statusEl) { statusEl.textContent = '✅ Aplicado'; statusEl.className = 'text-success'; }
+  } catch(e) {
+    console.error(`Error aplicando ajustes (${layer}):`, e);
+    if (statusEl) { statusEl.textContent = '❌ ' + e.message; statusEl.className = 'text-danger'; }
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Volver al archivo base (preset/original) y resetear los sliders
+function resetColorAdjustments(layer) {
+  if (layer === 'subject') compositeState.subjectAdjusted = null;
+  else compositeState.templateAdjusted = null;
+  resetColorSlidersUI(layer);
+  saveCompositeState();
+  const isSubject = layer === 'subject';
+  const current = isSubject ? compositeState.currentSubject : compositeState.currentTemplate;
+  if (current) loadImageForPreview(current, isSubject);
+  const statusEl = document.getElementById(`${layer}-color-status`);
+  if (statusEl) { statusEl.textContent = 'Restaurado'; statusEl.className = 'text-muted'; }
+}
+
 // ── Inicializar ────────────────────
 loadCompositeState(); // Recuperar estado guardado
-loadPresets();
+// Cargar presets y reflejar estado del botón Componer al cargar el DOM
+function initDarkroom() {
+  loadPresets();
+  updateComposeButtonState();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDarkroom);
+} else {
+  initDarkroom();
+}
 </script>
 </body>
 </html>
